@@ -1,6 +1,6 @@
-#include "window.h"
+#include <window.h>
 #include <fractal.h>
-#include <iostream>
+//#include <iostream>
 
 int main(){
   Fractal f = Fractal(5,5);
