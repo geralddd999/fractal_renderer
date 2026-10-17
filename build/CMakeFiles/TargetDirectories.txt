@@ -1,0 +1,4 @@
+/home/geronimo/Programming/cpp/fractal/build/CMakeFiles/Fractal.dir
+/home/geronimo/Programming/cpp/fractal/build/CMakeFiles/fractal_tests.dir
+/home/geronimo/Programming/cpp/fractal/build/CMakeFiles/edit_cache.dir
+/home/geronimo/Programming/cpp/fractal/build/CMakeFiles/rebuild_cache.dir

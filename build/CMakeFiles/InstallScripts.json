@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/geronimo/Programming/cpp/fractal/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
