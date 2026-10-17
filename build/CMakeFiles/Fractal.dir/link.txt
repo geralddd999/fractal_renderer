@@ -1,2 +1,0 @@
-/nix/store/j1938gsbvbhkyz4kbmvjk56r479mkw3s-gcc-wrapper-16.2.0/bin/ar qc libFractal.a CMakeFiles/Fractal.dir/src/fractal.cpp.o
-/nix/store/j1938gsbvbhkyz4kbmvjk56r479mkw3s-gcc-wrapper-16.2.0/bin/ranlib libFractal.a

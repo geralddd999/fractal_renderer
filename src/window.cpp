@@ -4,7 +4,9 @@
 #include <SDL2/SDL_keycode.h>
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_render.h>
+#include <SDL2/SDL_stdinc.h>
 #include <SDL2/SDL_video.h>
+#include <complex>
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
@@ -13,7 +15,7 @@
 Window::Window(std::size_t width, std::size_t height)
 : width_(width), height_(height), fractal_gen(width, height)
 {
-
+  _init();
 }
 
 Window::~Window(){
@@ -56,6 +58,8 @@ void Window::run(){
   bool render_change = true;
   bool running = true;
 
+  float scale = 0.0032;
+  FractalOrigin P = FractalOrigin{std::complex<float>(0,0), scale};
   while(running){
     SDL_Event e ;
     while (SDL_PollEvent(&e)){
@@ -66,11 +70,15 @@ void Window::run(){
       }else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
         //make one iteration move
         render_change = true;
+      }else if( e.type == SDL_MOUSEWHEEL ){
+        P.scale *= std::pow(0.8,(e.wheel.y));
+        fractal_gen.map_to_point(e.wheel.mouseX, e.wheel.mouseY, P);
+        render_change = true;
       }
     }
 
     if(render_change){
-      auto pixels = fractal_gen.render_screen(1.0);
+      auto pixels = fractal_gen.render_screen(P);
       SDL_UpdateTexture(texture_,
         nullptr,pixels.data(), width_ * static_cast<int>(sizeof(std::uint32_t)));
 

@@ -5,6 +5,10 @@
 #include <vector>
 #include <cstdint>
 
+struct FractalOrigin{
+  std::complex<float> origin;
+  float scale;
+};
 
 class Fractal{
 
@@ -13,6 +17,7 @@ class Fractal{
     size_t height_;
     unsigned int max_iterations_ = 1000;
     std::vector<uint32_t> colors_;
+    FractalOrigin current_origin_ = FractalOrigin{std::complex<float>(0.0, 0.0), 0.0023};
 
   public:
     Fractal(size_t width, size_t height);
@@ -21,7 +26,8 @@ class Fractal{
     /*
      * Single threaded implementation of the screen rendering for each pixel
      */
-    std::vector<uint32_t>& render_screen(float scale);
+    std::vector<uint32_t>& render_screen(FractalOrigin origin);
     uint32_t colorize(size_t iterations);
+    void map_to_point(int32_t mouse_x, int32_t mouse_y, FractalOrigin& P);
 
 };

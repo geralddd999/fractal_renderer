@@ -1,7 +1,9 @@
 #include "fractal.h"
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <vector>
 #include <complex>
 
@@ -32,28 +34,42 @@ uint32_t Fractal::calculate_fractal(std::complex<float> c){
     z = z_pow2 + c;
   }
 
-  auto color = (iterations/max_iterations_) * 255;
-  return color;
+  return iterations;
 }
 
-std::vector<uint32_t>& Fractal::render_screen(float scale){
+std::vector<uint32_t>& Fractal::render_screen(FractalOrigin P){
 
+  current_origin_.origin = P.origin + (current_origin_.origin - P.origin)*(P.scale/current_origin_.scale);
+  current_origin_.scale = P.scale;
   auto to_coords = [&](size_t px, size_t py){
-    float re = (px - float(width_)/2)*scale;
-    float im = -(py - float(height_)/2)*scale;
+    float re = current_origin_.origin.real() + (static_cast<float>(px) - static_cast<float>(width_)/2)*current_origin_.scale;
+    float im = current_origin_.origin.imag() -(static_cast<float>(py) - static_cast<float>(height_)/2)*current_origin_.scale;
     return std::complex<float>(re, im);
   };
 
   for(size_t h = 0 ; h < height_ ; ++h){
     for(size_t w = 0 ; w < width_ ; ++w){
       size_t idx = h*width_ + w;
-      colors_[idx] = calculate_fractal(to_coords(w, h));
+      auto iter =  calculate_fractal(to_coords(w, h));
+      colors_[idx] = colorize(iter);
     }
   }
-
   return colors_;
 }
+void Fractal::map_to_point(int32_t mouse_x, int32_t mouse_y, FractalOrigin& P){
+  float re = current_origin_.origin.real() + (static_cast<float>(mouse_x) - static_cast<float>(width_)/2)*current_origin_.scale;
+  float im = current_origin_.origin.imag() -(static_cast<float>(mouse_y) - static_cast<float>(height_)/2)*current_origin_.scale;
 
+  P.origin = std::complex<float>(re,im);
+}
 uint32_t Fractal::colorize(size_t iterations){
+  if(iterations >=max_iterations_){
+    return 0xFF000000u;
+  }
 
+  float t = std::log1p(iterations)/std::log1p(max_iterations_);
+  t = std::clamp(t* 255.0, 0.0 , 255.0);
+
+  //what the hell is the argb8888 rep;
+  return 0xFF000000u | (static_cast<std::uint32_t>(t) << 16) | (static_cast<std::uint32_t>(t) << 8) | static_cast<std::uint32_t>(t);
 }
