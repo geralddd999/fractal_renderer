@@ -19,6 +19,12 @@ target_sources(Fractal
       ./src/fractal.h
 )
 
+target_link_libraries(Fractal
+  PRIVATE
+    ThreadPool
+    TaskSet
+)
+
 add_library(Window)
 target_sources(Window
   PRIVATE
@@ -29,6 +35,28 @@ target_sources(Window
       ./src
     FILES
       ./src/window.h
+)
+
+add_library(ThreadPool)
+target_sources(ThreadPool
+  PRIVATE
+    src/ThreadPool.cpp
+  PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS
+      ./src
+    FILES
+      ./src/ThreadPool.h
+)
+
+add_library(TaskSet INTERFACE)
+target_sources(TaskSet
+  PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS
+      ./src
+    FILES
+      ./src/TaskSet.h
 )
 
 add_executable(fractal_tests)

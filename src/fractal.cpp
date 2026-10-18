@@ -1,4 +1,5 @@
 #include "fractal.h"
+#include "TaskSet.h"
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -46,7 +47,7 @@ std::vector<uint32_t>& Fractal::render_screen(FractalOrigin P){
     return std::complex<float>(re, im);
   };
 
-  for(size_t h = 0 ; h < height_ ; ++h){
+    for(size_t h = 0 ; h < height_ ; ++h){
     for(size_t w = 0 ; w < width_ ; ++w){
       size_t idx = h*width_ + w;
       auto iter =  calculate_fractal(to_coords(w, h));
@@ -55,6 +56,40 @@ std::vector<uint32_t>& Fractal::render_screen(FractalOrigin P){
   }
   return colors_;
 }
+
+std::vector<uint32_t>& Fractal::render_screen(FractalOrigin P, bool multithreaded){
+  current_origin_.origin = P.origin + (current_origin_.origin - P.origin)*(P.scale/current_origin_.scale);
+  current_origin_.scale = P.scale;
+
+  std::size_t num_chunks = height_ / pool_.size();
+  int rows_per_chunk = (height_ + num_chunks -1) / num_chunks;
+
+  TaskSet tasks;
+  for(size_t i = 0 ; i < num_chunks ; ++i){
+    auto y_start = i * rows_per_chunk;
+    auto y_end = std::min(y_start + rows_per_chunk, height_);
+    pool_.execute_par(tasks, [y_start, y_end,width = width_, &c = colors_, this](){
+      for(size_t h = y_start ; h < y_end ; ++h){
+          for(size_t w = 0 ; w < width ; ++w){
+            size_t idx = h*width + w;
+            auto iter =  calculate_fractal(to_coords(w, h));
+            c[idx] = colorize(iter);
+          }
+        }
+    });
+  }
+  tasks.wait();
+
+  return colors_;
+}
+
+std::complex<float> Fractal::to_coords(size_t px, size_t py){
+  float re = current_origin_.origin.real() + (static_cast<float>(px) - static_cast<float>(width_)/2)*current_origin_.scale;
+  float im = current_origin_.origin.imag() -(static_cast<float>(py) - static_cast<float>(height_)/2)*current_origin_.scale;
+  return std::complex<float>(re, im);
+}
+
+
 void Fractal::map_to_point(int32_t mouse_x, int32_t mouse_y, FractalOrigin& P){
   float re = current_origin_.origin.real() + (static_cast<float>(mouse_x) - static_cast<float>(width_)/2)*current_origin_.scale;
   float im = current_origin_.origin.imag() -(static_cast<float>(mouse_y) - static_cast<float>(height_)/2)*current_origin_.scale;

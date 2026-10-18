@@ -1,4 +1,3 @@
-#include "fractal.h"
 #include <SDL2/SDL_error.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keycode.h>
@@ -10,8 +9,11 @@
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
-#include <window.h>
 #include <SDL2/SDL.h>
+
+#include <window.h>
+#include <fractal.h>
+
 Window::Window(std::size_t width, std::size_t height)
 : width_(width), height_(height), fractal_gen(width, height)
 {
@@ -78,7 +80,8 @@ void Window::run(){
     }
 
     if(render_change){
-      auto pixels = fractal_gen.render_screen(P);
+
+      auto pixels = fractal_gen.render_screen(P, true);
       SDL_UpdateTexture(texture_,
         nullptr,pixels.data(), width_ * static_cast<int>(sizeof(std::uint32_t)));
 
